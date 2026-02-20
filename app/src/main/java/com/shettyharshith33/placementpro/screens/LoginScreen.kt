@@ -1,18 +1,26 @@
 package com.shettyharshith33.placementpro.screens
 
-
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.shettyharshith33.placementpro.models.UserRole
+
+private val PrimaryBlue = Color(0xFF4DA3FF)
 
 @Composable
 fun LoginScreen(
@@ -20,7 +28,6 @@ fun LoginScreen(
     onLoginSuccess: (String) -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
-
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
@@ -28,130 +35,147 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var secretCode by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.Center
+    val textFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = Color.Black,
+        unfocusedTextColor = Color.Black,
+        focusedBorderColor = PrimaryBlue,
+        unfocusedBorderColor = Color.Gray,
+        focusedLabelColor = PrimaryBlue,
+        cursorColor = PrimaryBlue
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
     ) {
 
-        Text("Login as ${role.uppercase()}")
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        OutlinedTextField(
-            colors = OutlinedTextFieldDefaults.colors().copy(focusedTextColor = Color.Black),
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email", color = Color.Black) },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            colors = OutlinedTextFieldDefaults.colors().copy(focusedTextColor = Color.Black),
-            value = password,
-            onValueChange = { password = it },
-            visualTransformation = PasswordVisualTransformation(),
-            label = { Text("Password", color = Color.Black) },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        // 🔴 TPO extra field
-        if (role == UserRole.TPO) {
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedTextField(
-                value = secretCode,
-                onValueChange = { secretCode = it },
-                label = { Text("Institution Secret Code") },
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = {
-
-                // 🟥 TPO SECURE LOGIN
-                if (role == UserRole.TPO) {
-
-                    db.collection("tpo_access")
-                        .document("primary")
-                        .get()
-                        .addOnSuccessListener { doc ->
-
-                            val correctCode = doc.getString("secretCode")
-                            val allowedEmails =
-                                doc.get("allowedEmails") as? List<*>
-
-                            if (secretCode != correctCode ||
-                                allowedEmails?.contains(email) != true
-                            ) {
-                                Toast.makeText(
-                                    context,
-                                    "Unauthorized TPO",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                return@addOnSuccessListener
-                            }
-
-                            auth.signInWithEmailAndPassword(email, password)
-                                .addOnSuccessListener {
-                                    onLoginSuccess(role)
-                                }
-                                .addOnFailureListener {
-                                    Toast.makeText(
-                                        context,
-                                        "Login failed",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                        }
-
-                } else {
-                    // 🟩 STUDENT / ALUMNI LOGIN
-                    auth.signInWithEmailAndPassword(email, password)
-                        .addOnSuccessListener {
-                            onLoginSuccess(role)
-                        }
-                        .addOnFailureListener {
-                            Toast.makeText(
-                                context,
-                                "Login failed",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("LOGIN")
-        }
-
-        // ✅ Google only for student & alumni
-        if (role != UserRole.TPO) {
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedButton(
-                onClick = {
-                    Toast.makeText(
-                        context,
-                        "Google Sign-In next step",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                },
-                modifier = Modifier.fillMaxWidth()
+        Surface(color = Color.White) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Text("Sign in with Google")
+
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = null,
+                    tint = PrimaryBlue,
+                    modifier = Modifier.size(72.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Welcome Back",
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = PrimaryBlue
+                )
+
+                Text(
+                    text = "Login as ${role.replaceFirstChar { it.uppercase() }}",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+
+                Spacer(modifier = Modifier.height(40.dp))
+
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("College Email") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = textFieldColors,
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    visualTransformation = PasswordVisualTransformation(),
+                    label = { Text("Password") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = textFieldColors,
+                    singleLine = true
+                )
+
+                if (role == UserRole.TPO) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = secretCode,
+                        onValueChange = { secretCode = it },
+                        label = { Text("Institution Secret Code") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = textFieldColors,
+                        singleLine = true
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Button(
+                    onClick = {
+                        if (email.isBlank() || password.isBlank()) {
+                            Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+
+                        isLoading = true
+
+                        auth.signInWithEmailAndPassword(email, password)
+                            .addOnSuccessListener {
+                                isLoading = false
+                                onLoginSuccess(role)
+                            }
+                            .addOnFailureListener {
+                                isLoading = false
+                                Toast.makeText(context, "Login Failed", Toast.LENGTH_SHORT).show()
+                            }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
+                    enabled = !isLoading
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("LOGIN", fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("New here?", color = Color.Gray)
+                    TextButton(onClick = onNavigateToRegister) {
+                        Text("Create Account", color = PrimaryBlue, fontWeight = FontWeight.Bold)
+                    }
+                }
             }
+        }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            TextButton(onClick = onNavigateToRegister) {
-                Text("New User? Register Here")
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.25f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = PrimaryBlue)
             }
         }
     }
