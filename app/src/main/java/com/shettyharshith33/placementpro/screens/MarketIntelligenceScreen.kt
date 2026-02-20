@@ -31,9 +31,11 @@ fun MarketIntelligenceScreen(onBack: () -> Unit) {
     val navyBlue = Color(0xFF1C375B)
 
     val marketTrends = listOf(
-        MarketTrend("SDE - 1", listOf("Java", "Kotlin", "Spring Boot", "AWS"), "High"),
-        MarketTrend("Data Analyst", listOf("Python", "SQL", "PowerBI", "Tableau"), "Medium"),
-        MarketTrend("Cloud Engineer", listOf("Docker", "Kubernetes", "Azure", "Linux"), "Very High")
+        MarketTrend("SDE - 1 (Backend)", listOf("Java", "Kotlin", "Spring Boot", "AWS", "SQL"), "High"),
+        MarketTrend("Frontend Developer", listOf("React", "TypeScript", "Tailwind", "Next.js"), "Very High"),
+        MarketTrend("Data Analyst", listOf("Python", "SQL", "PowerBI", "Tableau", "Excel"), "Medium"),
+        MarketTrend("Cloud Engineer", listOf("Docker", "Kubernetes", "Azure", "Linux"), "High"),
+        MarketTrend("AI/ML Engineer", listOf("Python", "PyTorch", "NLP", "TensorFlow"), "Trending")
     )
 
     LaunchedEffect(Unit) {

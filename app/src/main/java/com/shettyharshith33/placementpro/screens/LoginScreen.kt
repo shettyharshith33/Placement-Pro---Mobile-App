@@ -34,7 +34,6 @@ fun LoginScreen(
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var secretCode by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
     val textFieldColors = OutlinedTextFieldDefaults.colors(
@@ -107,17 +106,7 @@ fun LoginScreen(
                     singleLine = true
                 )
 
-                if (role == UserRole.TPO) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = secretCode,
-                        onValueChange = { secretCode = it },
-                        label = { Text("Institution Secret Code") },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = textFieldColors,
-                        singleLine = true
-                    )
-                }
+
 
                 Spacer(modifier = Modifier.height(32.dp))
 

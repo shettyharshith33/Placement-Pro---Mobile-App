@@ -64,7 +64,7 @@ fun AlumniDashboardView() {
                     .addSnapshotListener { snapshot, _ ->
                         if (snapshot != null) {
                             referrals = snapshot.toObjects(Referral::class.java)
-                                .sortedByDescending { it.createdAt }
+                                .sortedByDescending { it.createdAtTimestamp?.seconds ?: 0L }
                             isLoading = false
                         }
                     }
@@ -442,18 +442,7 @@ fun AlumniProfileView(user: User?) {
     }
 }
 
-@Composable
-fun ProfileItemRow(label: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(label, color = Color.Gray)
-        Text(value, fontWeight = FontWeight.Bold)
-    }
-}
+
 
 @Composable
 fun AddSlotDialog(onDismiss: () -> Unit, onSave: (String) -> Unit) {

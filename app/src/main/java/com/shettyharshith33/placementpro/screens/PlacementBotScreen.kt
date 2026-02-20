@@ -30,10 +30,13 @@ fun PlacementBotScreen(onBack: () -> Unit) {
         messages.add(Message(inputText, false))
         
         val response = when {
-            inputText.contains("cutoff", ignoreCase = true) -> "Most companies require a CGPA of 7.0 or above with no active backlogs."
-            inputText.contains("resume", ignoreCase = true) -> "You can generate your branded resume from the 'Profile' tab in your dashboard!"
-            inputText.contains("interview", ignoreCase = true) -> "Check your 'My Applications' tab. If you are scheduled, the date will appear there."
-            else -> "I'm here to help with placements. Try asking about 'cutoff', 'resume', or 'interviews'."
+            inputText.contains("cutoff", ignoreCase = true) || inputText.contains("criteria", ignoreCase = true) -> "Most companies require a CGPA of 7.0 or above with no active backlogs. Check individual drive details for specifics."
+            inputText.contains("resume", ignoreCase = true) -> "You can refine your professional profile and attach your resume from the 'Resume Wizard' in your profile settings!"
+            inputText.contains("interview", ignoreCase = true) || inputText.contains("timing", ignoreCase = true) -> "Interview timings are posted in the 'My Applications' section once a TPO assigns a slot. Keep checking there!"
+            inputText.contains("venue", ignoreCase = true) || inputText.contains("location", ignoreCase = true) -> "Most interviews are currently happening in the 'MCA Seminar Hall' or virtually via Microsoft Teams. Verify the drive description if it's virtual."
+            inputText.contains("refer", ignoreCase = true) || inputText.contains("alumni", ignoreCase = true) -> "Go to the 'Alumni Connect' section to see job referrals from our graduates or book a mentorship slot!"
+            inputText.contains("hello", ignoreCase = true) || inputText.contains("hi", ignoreCase = true) -> "Hello! I'm your 24/7 Career Assistant. Ask me about cutoffs, venues, or resumes!"
+            else -> "I'm specializing in placement queries. Try asking: 'What is the cutoff?', 'Where is the venue?', or 'How to get a referral?'"
         }
         
         messages.add(Message(response, true))

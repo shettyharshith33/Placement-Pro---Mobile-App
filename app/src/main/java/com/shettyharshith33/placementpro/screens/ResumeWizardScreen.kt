@@ -52,6 +52,10 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
     var rollNumber by remember { mutableStateOf("") }
     var skillInput by remember { mutableStateOf("") }
     var skillsList by remember { mutableStateOf(listOf<String>()) }
+    var projectsList by remember { mutableStateOf(listOf<com.shettyharshith33.placementpro.models.Project>()) }
+    var projectTitle by remember { mutableStateOf("") }
+    var projectDesc by remember { mutableStateOf("") }
+
     var resumeUri by remember { mutableStateOf<Uri?>(null) }
     var isLoading by remember { mutableStateOf(false) }
 
@@ -69,6 +73,7 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
                     backlogs = it.backlogs.toString()
                     rollNumber = it.rollNumber
                     skillsList = it.skills
+                    projectsList = it.projects
                 }
             }
         }
@@ -98,6 +103,7 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
                 "cgpa" to (cgpa.toDoubleOrNull() ?: 0.0),
                 "backlogs" to (backlogs.toIntOrNull() ?: 0),
                 "skills" to skillsList,
+                "projects" to projectsList,
                 "resumeUrl" to resumeUrlFinal,
                 "resumeFileName" to fileName,
                 "profileCompleted" to true,
@@ -229,6 +235,49 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
                                 trailingIcon = { Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(16.dp)) }
                             )
                         }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // SECTION 4: PROJECTS
+            WizardSectionHeader("Key Projects", Icons.Default.List)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = androidx.compose.foundation.BorderStroke(0.5.dp, Color.LightGray.copy(alpha = 0.5f))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    OutlinedTextField(projectTitle, { projectTitle = it }, label = { Text("Project Title") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(projectDesc, { projectDesc = it }, label = { Text("Short Description") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            if (projectTitle.isNotBlank()) {
+                                projectsList = projectsList + com.shettyharshith33.placementpro.models.Project(projectTitle, projectDesc)
+                                projectTitle = ""
+                                projectDesc = ""
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = navyBlue.copy(alpha = 0.1f))
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null, tint = navyBlue)
+                        Text("Add Project", color = navyBlue)
+                    }
+
+                    projectsList.forEach { proj ->
+                        ListItem(
+                            headlineContent = { Text(proj.title, fontWeight = FontWeight.Bold) },
+                            supportingContent = { Text(proj.description) },
+                            trailingContent = {
+                                IconButton(onClick = { projectsList = projectsList - proj }) {
+                                    Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red)
+                                }
+                            }
+                        )
                     }
                 }
             }

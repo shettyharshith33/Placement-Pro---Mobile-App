@@ -70,7 +70,7 @@ fun StudentDashboard(
                             // 🧠 Filter locally for exact eligibility matching
                             availableDrives = allDrives.filter { drive ->
                                 profile.cgpa >= drive.minCGPA && profile.backlogs <= drive.maxBacklogs
-                            }.sortedByDescending { it.createdAt }
+                            }.sortedByDescending { it.createdAtTimestamp?.seconds ?: 0L }
                             isLoading = false
                         }
                     }
@@ -362,7 +362,7 @@ fun DriveCard(
                     Text(drive.companyName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = navyBlue)
                     Text(drive.roleOffered, color = Color.Gray)
                 }
-                Text("${drive.packageLPA} LPA", color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text("${drive.packageDouble} LPA", color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold, fontSize = 18.sp)
             }
             
             Spacer(modifier = Modifier.height(12.dp))
@@ -505,5 +505,18 @@ fun StudentSlotCard(slot: com.shettyharshith33.placementpro.models.MentorSlot, s
                 Text("Book Slot")
             }
         }
+    }
+}
+
+@Composable
+fun ProfileItemRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, color = Color.Gray, fontSize = 13.sp)
+        Text(value, fontWeight = FontWeight.Bold, color = Color(0xFF1C375B), fontSize = 13.sp)
     }
 }

@@ -38,6 +38,7 @@ data class User(
     val phone: String = "",
     val rollNumber: String = "",
     val skills: List<String> = emptyList(),
+    val projects: List<Project> = emptyList(),
     val resumeUrl: String = "",
     val resumeFileName: String = ""
 )
@@ -63,19 +64,42 @@ data class CompanyDrive(
     val description: String = "",
     @get:PropertyName("package")
     @set:PropertyName("package")
-    var packageLPA: Double = 0.0,
+    var packageLPA: Any = 0.0,
     @get:PropertyName("isActive")
     @set:PropertyName("isActive")
-    var isActive: Boolean = true,
+    var isActive: Any = true,
     val minCGPA: Double = 0.0,
     val maxBacklogs: Int = 0,
     val batchYear: Int = 2026,
-    val deadline: Timestamp? = null,
-    val createdAt: Timestamp? = null,
+    val deadline: Any? = null,
+    val createdAt: Any? = null,
     val createdBy: String = "",
     val rounds: List<String> = emptyList(),
     val allowedBranches: List<String> = emptyList()
-)
+) {
+    @get:com.google.firebase.firestore.Exclude
+    val packageDouble: Double
+        get() = when (val p = packageLPA) {
+            is Number -> p.toDouble()
+            is String -> p.toDoubleOrNull() ?: 0.0
+            else -> 0.0
+        }
+
+    @get:com.google.firebase.firestore.Exclude
+    val isActiveCheckedCust: Boolean
+        get() = when (val a = isActive) {
+            is Boolean -> a
+            is String -> a.toBoolean()
+            else -> true
+        }
+
+    @get:com.google.firebase.firestore.Exclude
+    val createdAtTimestamp: Timestamp?
+        get() = when (val c = createdAt) {
+            is Timestamp -> c
+            else -> null
+        }
+}
 
 
 
@@ -87,10 +111,17 @@ data class Referral(
     val companyName: String = "",
     val role: String = "",
     val description: String = "",
-    val deadline: Timestamp? = null,
-    val createdAt: Timestamp? = null,
+    val deadline: Any? = null,
+    val createdAt: Any? = null,
     val isActive: Boolean = true
-)
+) {
+    @get:com.google.firebase.firestore.Exclude
+    val createdAtTimestamp: Timestamp?
+        get() = when (val c = createdAt) {
+            is Timestamp -> c
+            else -> null
+        }
+}
 
 object ApplicationStatus {
     const val APPLIED = "Applied"
@@ -111,10 +142,15 @@ data class Application(
     val companyName: String = "",
     val roleOffered: String = "",
     val status: String = ApplicationStatus.APPLIED,
-    val appliedAt: Timestamp? = null
-)
-
-
+    val appliedAt: Any? = null
+) {
+    @get:com.google.firebase.firestore.Exclude
+    val appliedAtTimestamp: Timestamp?
+        get() = when (val a = appliedAt) {
+            is Timestamp -> a
+            else -> null
+        }
+}
 
 
 data class MentorSlot(
@@ -124,8 +160,15 @@ data class MentorSlot(
     val availableTime: String = "",
     val isBooked: Boolean = false,
     val bookedBy: String = "",
-    val createdAt: Timestamp? = null
-)
+    val createdAt: Any? = null
+) {
+    @get:com.google.firebase.firestore.Exclude
+    val createdAtTimestamp: Timestamp?
+        get() = when (val c = createdAt) {
+            is Timestamp -> c
+            else -> null
+        }
+}
 
 // Navigation routes
 sealed class Screen(val route: String) {

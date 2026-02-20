@@ -64,7 +64,7 @@ fun DashboardContent(
                 .padding(padding)
         ) {
 
-            when (role) {
+            when (role.lowercase()) {
 
                 // ================= STUDENT =================
                 UserRole.STUDENT -> {
