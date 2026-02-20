@@ -1,6 +1,7 @@
 package com.shettyharshith33.placementpro.screens
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.compose.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -15,6 +16,24 @@ fun PlacementProApp() {
     val navController = rememberNavController()
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
+
+    // 🔥 AUTO-LOGIN LOGIC
+    LaunchedEffect(Unit) {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            db.collection(FirestoreCollections.USERS).document(currentUser.uid).get()
+                .addOnSuccessListener { doc ->
+                    val role = doc.getString("role") ?: ""
+                    val isComplete = doc.getBoolean("profileCompleted") ?: false
+                    
+                    if (role == UserRole.STUDENT && !isComplete) {
+                        navController.navigate(Screen.ResumeWizard.route) { popUpTo(0) }
+                    } else if (role.isNotBlank()) {
+                        navController.navigate(Screen.Dashboard.createRoute(role)) { popUpTo(0) }
+                    }
+                }
+        }
+    }
 
     NavHost(
         navController = navController,
@@ -133,7 +152,47 @@ fun PlacementProApp() {
                     navController.navigate(Screen.RoleSelection.route) {
                         popUpTo(0)
                     }
+                },
+                onNavigateToCreateDrive = {
+                    navController.navigate(Screen.CreateDrive.route)
+                },
+                onNavigateToBot = {
+                    navController.navigate(Screen.PlacementBot.route)
+                },
+                onNavigateToScheduler = {
+                    navController.navigate(Screen.InterviewScheduler.route)
+                },
+                onNavigateToMarket = {
+                    navController.navigate(Screen.MarketIntelligence.route)
                 }
+            )
+        }
+
+        // ================= CREATE DRIVE (TPO) =================
+        composable(Screen.CreateDrive.route) {
+            CreateDriveScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // ================= PLACEMENT BOT =================
+        composable(Screen.PlacementBot.route) {
+            PlacementBotScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // ================= MARKET INTELLIGENCE =================
+        composable(Screen.MarketIntelligence.route) {
+            MarketIntelligenceScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // ================= INTERVIEW SCHEDULER =================
+        composable(Screen.InterviewScheduler.route) {
+            InterviewSchedulerScreen(
+                onBack = { navController.popBackStack() }
             )
         }
     }

@@ -213,7 +213,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.shettyharshith33.placementpro.models.FirestoreCollections
 
-private val PrimaryBlue = Color(0xFF4DA3FF)
+private val NavyBlue = Color(0xFF1C375B)
 
 @Composable
 fun RegisterScreen(
@@ -232,10 +232,10 @@ fun RegisterScreen(
     val textFieldColors = OutlinedTextFieldDefaults.colors(
         focusedTextColor = Color.Black,
         unfocusedTextColor = Color.Black,
-        focusedBorderColor = PrimaryBlue,
+        focusedBorderColor = NavyBlue,
         unfocusedBorderColor = Color.Gray,
-        focusedLabelColor = PrimaryBlue,
-        cursorColor = PrimaryBlue
+        focusedLabelColor = NavyBlue,
+        cursorColor = NavyBlue
     )
 
     Box(
@@ -257,7 +257,7 @@ fun RegisterScreen(
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = null,
-                    tint = PrimaryBlue,
+                    tint = NavyBlue,
                     modifier = Modifier.size(72.dp)
                 )
 
@@ -267,7 +267,7 @@ fun RegisterScreen(
                     text = "Create Account",
                     fontSize = 30.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = PrimaryBlue
+                    color = NavyBlue
                 )
 
                 Text(
@@ -367,7 +367,7 @@ fun RegisterScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
+                    colors = ButtonDefaults.buttonColors(containerColor = NavyBlue),
                     enabled = !isLoading
                 ) {
                     if (isLoading) {
@@ -395,7 +395,7 @@ fun RegisterScreen(
                     .background(Color.Black.copy(alpha = 0.25f)),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = PrimaryBlue)
+                CircularProgressIndicator(color = NavyBlue)
             }
         }
     }

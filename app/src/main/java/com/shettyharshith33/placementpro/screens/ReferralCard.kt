@@ -1,3 +1,4 @@
+/*
 package com.shettyharshith33.placementpro.screens
 
 import androidx.compose.foundation.layout.Column
@@ -43,4 +44,4 @@ fun ReferralCard(referral: Referral) {
             )
         }
     }
-}
+}*/

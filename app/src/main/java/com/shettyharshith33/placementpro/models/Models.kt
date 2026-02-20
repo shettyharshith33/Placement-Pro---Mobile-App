@@ -11,7 +11,6 @@ object UserRole {
 
 object FirestoreCollections {
     const val USERS = "users"
-    const val STUDENTS = "students"
     const val COMPANIES = "companies"
     const val APPLICATIONS = "applications"
     const val SETTINGS = "settings"
@@ -29,25 +28,18 @@ data class User(
     val profileCompleted: Boolean = false,
     val createdAt: Timestamp? = null,
     val fcmToken: String = "",
-    val isActive: Boolean = true
-)
-
-// 3. Extended Student Model (Found in 'students' collection)
-data class StudentProfile(
-    val uid: String = "",
-    val branch: String = "",
-    val batchYear: Int = 2026,
+    val isActive: Boolean = true,
+    // Add student specific fields here directly for easier querying in the "Criteria Engine"
     val cgpa: Double = 0.0,
     val backlogs: Int = 0,
+    val branch: String = "",
     val phone: String = "",
+    val rollNumber: String = "",
     val skills: List<String> = emptyList(),
-    val resumeUrl: String? = null,
-    val profileScore: Int = 0,
-    val placed: Boolean = false,
-    val projects: List<Project> = emptyList(),
-    val certifications: List<Certification> = emptyList(),
-    val internships: List<Internship> = emptyList()
+    val resumeUrl: String = "",
+    val resumeFileName: String = ""
 )
+
 
 data class Project(
     val title: String = "",
@@ -66,8 +58,8 @@ data class CompanyDrive(
     val roleOffered: String = "",
     val location: String = "",
     val description: String = "",
-    // Use backticks to match the Firestore field name exactly
-    val `package`: Double = 0.0,
+    // Use packageLPA to avoid reserved keyword 'package'
+    val packageLPA: Double = 0.0,
     val isActive: Boolean = true,
     val minCGPA: Double = 0.0,
     val maxBacklogs: Int = 0,
@@ -94,8 +86,37 @@ data class Referral(
     val isActive: Boolean = true
 )
 
+object ApplicationStatus {
+    const val APPLIED = "Applied"
+    const val APTITUDE = "Aptitude"
+    const val CLEARED = "Cleared"
+    const val INTERVIEW = "Interview Scheduled"
+    const val SELECTED = "Selected"
+    const val REJECTED = "Rejected"
+}
+
+data class Application(
+    val applicationId: String = "",
+    val driveId: String = "",
+    val studentId: String = "",
+    val companyName: String = "",
+    val roleOffered: String = "",
+    val status: String = ApplicationStatus.APPLIED,
+    val appliedAt: Timestamp? = null
+)
 
 
+
+
+data class MentorSlot(
+    val slotId: String = "",
+    val alumniId: String = "",
+    val alumniName: String = "",
+    val availableTime: String = "",
+    val isBooked: Boolean = false,
+    val bookedBy: String = "",
+    val createdAt: Timestamp? = null
+)
 
 // Navigation routes
 sealed class Screen(val route: String) {
@@ -117,4 +138,12 @@ sealed class Screen(val route: String) {
     object Dashboard : Screen("dashboard/{role}") {
         fun createRoute(role: String) = "dashboard/$role"
     }
+
+    object CreateDrive : Screen("create_drive")
+
+    object PlacementBot : Screen("placement_bot")
+
+    object MarketIntelligence : Screen("market_intelligence")
+
+    object InterviewScheduler : Screen("interview_scheduler")
 }

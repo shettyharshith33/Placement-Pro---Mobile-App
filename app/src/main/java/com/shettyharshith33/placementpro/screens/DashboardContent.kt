@@ -16,11 +16,16 @@ import com.shettyharshith33.placementpro.models.UserRole
 @Composable
 fun DashboardContent(
     role: String,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onNavigateToCreateDrive: () -> Unit = {},
+    onNavigateToBot: () -> Unit = {},
+    onNavigateToScheduler: () -> Unit = {},
+    onNavigateToMarket: () -> Unit = {}
 ) {
     val navyBlue = Color(0xFF1C375B)
 
     Scaffold(
+        containerColor = Color.White,
         topBar = {
             TopAppBar(
                 title = {
@@ -43,6 +48,13 @@ fun DashboardContent(
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            if (role != UserRole.TPO) { // TPO already has an 'Add' FAB
+                FloatingActionButton(onClick = onNavigateToBot, containerColor = navyBlue, contentColor = Color.White) {
+                    Text("AI", fontWeight = FontWeight.Bold)
+                }
+            }
         }
     ) { padding ->
 
@@ -57,13 +69,17 @@ fun DashboardContent(
                 // ================= STUDENT =================
                 UserRole.STUDENT -> {
                     StudentDashboard(
-                        onLogout = onLogout
+                        onLogout = onLogout,
+                        onNavigateToMarket = onNavigateToMarket
                     )
                 }
 
                 // ================= TPO =================
                 UserRole.TPO -> {
-                    TPODashboardView()
+                    TPODashboardView(
+                        onNavigateToCreateDrive = onNavigateToCreateDrive,
+                        onNavigateToScheduler = onNavigateToScheduler
+                    )
                 }
 
                 // ================= ALUMNI =================

@@ -20,7 +20,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.shettyharshith33.placementpro.models.UserRole
 
-private val PrimaryBlue = Color(0xFF4DA3FF)
+private val NavyBlue = Color(0xFF1C375B)
 
 @Composable
 fun LoginScreen(
@@ -40,10 +40,10 @@ fun LoginScreen(
     val textFieldColors = OutlinedTextFieldDefaults.colors(
         focusedTextColor = Color.Black,
         unfocusedTextColor = Color.Black,
-        focusedBorderColor = PrimaryBlue,
+        focusedBorderColor = NavyBlue,
         unfocusedBorderColor = Color.Gray,
-        focusedLabelColor = PrimaryBlue,
-        cursorColor = PrimaryBlue
+        focusedLabelColor = NavyBlue,
+        cursorColor = NavyBlue
     )
 
     Box(
@@ -65,7 +65,7 @@ fun LoginScreen(
                 Icon(
                     imageVector = Icons.Default.Lock,
                     contentDescription = null,
-                    tint = PrimaryBlue,
+                    tint = NavyBlue,
                     modifier = Modifier.size(72.dp)
                 )
 
@@ -75,7 +75,7 @@ fun LoginScreen(
                     text = "Welcome Back",
                     fontSize = 30.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = PrimaryBlue
+                    color = NavyBlue
                 )
 
                 Text(
@@ -143,7 +143,7 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
+                    colors = ButtonDefaults.buttonColors(containerColor = NavyBlue),
                     enabled = !isLoading
                 ) {
                     if (isLoading) {
@@ -162,7 +162,7 @@ fun LoginScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("New here?", color = Color.Gray)
                     TextButton(onClick = onNavigateToRegister) {
-                        Text("Create Account", color = PrimaryBlue, fontWeight = FontWeight.Bold)
+                        Text("Create Account", color = NavyBlue, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -175,7 +175,7 @@ fun LoginScreen(
                     .background(Color.Black.copy(alpha = 0.25f)),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = PrimaryBlue)
+                CircularProgressIndicator(color = NavyBlue)
             }
         }
     }
