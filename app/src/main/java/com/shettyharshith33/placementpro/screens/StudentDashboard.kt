@@ -18,6 +18,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.os.Vibrator
+import android.os.VibrationEffect
+import android.content.Context
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -127,6 +130,24 @@ fun StudentDashboard(
                 Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                     when(selectedTab) {
                         0 -> {
+                            // 🔥 KUDOS MESSAGE
+                            Card(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF2E7D32))
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        "Kudos! You are eligible for the following companies based on your academic profile.",
+                                        color = Color(0xFF2E7D32),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+
                             Button(
                                 onClick = onNavigateToMarket,
                                 modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
@@ -137,7 +158,7 @@ fun StudentDashboard(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("Check Market Match (Skill Analysis)")
                             }
-                            DrivesListContent(availableDrives, studentProfile?.uid ?: "")
+                            DrivesListContent(availableDrives, studentProfile, myApplications)
                         }
                         1 -> ApplicationsListContent(myApplications)
                         2 -> MentorshipSectionStudent(mentorshipSlots, studentProfile?.uid ?: "")
@@ -259,7 +280,8 @@ fun StudentProfileView(user: User?, onEditResume: () -> Unit) {
 }
 
 @Composable
-fun DrivesListContent(drives: List<CompanyDrive>, studentId: String) {
+fun DrivesListContent(drives: List<CompanyDrive>, student: User?, myApplications: List<com.shettyharshith33.placementpro.models.Application>) {
+    if (student == null) return
     if (drives.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("No matching jobs for your criteria yet.", color = Color.Gray)
@@ -267,18 +289,65 @@ fun DrivesListContent(drives: List<CompanyDrive>, studentId: String) {
     } else {
         LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             items(drives) { drive ->
-                DriveCard(drive, studentId)
+                val application = myApplications.find { it.driveId == drive.companyId }
+                DriveCard(drive, student, application)
             }
         }
     }
 }
 
 @Composable
-fun DriveCard(drive: CompanyDrive, studentId: String) {
+fun DriveCard(
+    drive: CompanyDrive,
+    student: User,
+    existingApplication: com.shettyharshith33.placementpro.models.Application? = null
+) {
     val db = FirebaseFirestore.getInstance()
     val context = LocalContext.current
     var isApplying by remember { mutableStateOf(false) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
     val navyBlue = Color(0xFF1C375B)
+
+    val isApplied = existingApplication != null
+
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("Confirm Application") },
+            text = { Text("Are you sure you want to apply for the ${drive.roleOffered} role at ${drive.companyName}?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showConfirmDialog = false
+                        isApplying = true
+                        val appId = "${student.uid}_${drive.companyId}"
+                        val app = com.shettyharshith33.placementpro.models.Application(
+                            applicationId = appId,
+                            driveId = drive.companyId,
+                            studentId = student.uid,
+                            studentName = student.name,
+                            studentResumeUrl = student.resumeUrl,
+                            studentCgpa = student.cgpa,
+                            companyName = drive.companyName,
+                            roleOffered = drive.roleOffered,
+                            appliedAt = Timestamp.now()
+                        )
+                        db.collection(FirestoreCollections.APPLICATIONS).document(appId).set(app)
+                            .addOnSuccessListener {
+                                isApplying = false
+                                Toast.makeText(context, "Successfully Applied!", Toast.LENGTH_SHORT).show()
+                            }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = navyBlue)
+                ) {
+                    Text("Yes, Apply", color = Color.White)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmDialog = false }) { Text("Cancel") }
+            }
+        )
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -302,6 +371,22 @@ fun DriveCard(drive: CompanyDrive, studentId: String) {
             
             Text(drive.description, maxLines = 2, fontSize = 14.sp)
             
+            if (isApplied) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Surface(
+                    color = Color(0xFFE3F2FD),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "Status: ${existingApplication?.status}",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        color = navyBlue,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(12.dp))
             
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -313,30 +398,27 @@ fun DriveCard(drive: CompanyDrive, studentId: String) {
                 
                 Button(
                     onClick = {
-                        isApplying = true
-                        val appId = "${studentId}_${drive.companyId}"
-                        val app = com.shettyharshith33.placementpro.models.Application(
-                            applicationId = appId,
-                            driveId = drive.companyId,
-                            studentId = studentId,
-                            companyName = drive.companyName,
-                            roleOffered = drive.roleOffered,
-                            appliedAt = Timestamp.now()
-                        )
-                        db.collection(FirestoreCollections.APPLICATIONS).document(appId).set(app)
-                            .addOnSuccessListener {
-                                isApplying = false
-                                Toast.makeText(context, "Successfully Applied!", Toast.LENGTH_SHORT).show()
-                            }
+                        if (isApplied) return@Button
+                        
+                        // Trigger Vibration
+                        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+                        } else {
+                            vibrator.vibrate(50)
+                        }
+                        showConfirmDialog = true
                     },
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = navyBlue),
-                    enabled = !isApplying
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isApplied) Color.Gray else navyBlue
+                    ),
+                    enabled = !isApplying && !isApplied
                 ) {
                     if (isApplying) {
                         CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
                     } else {
-                        Text("Apply Now")
+                        Text(if (isApplied) "Applied" else "Apply Now", color = Color.White)
                     }
                 }
             }

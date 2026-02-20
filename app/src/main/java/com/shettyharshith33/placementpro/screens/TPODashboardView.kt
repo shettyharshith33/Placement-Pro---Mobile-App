@@ -1,6 +1,8 @@
 package com.shettyharshith33.placementpro.screens
 
 import android.widget.Toast
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -282,6 +284,7 @@ fun TPOApplicationsContent(apps: List<com.shettyharshith33.placementpro.models.A
 @Composable
 fun ApplicationTpoCard(app: com.shettyharshith33.placementpro.models.Application) {
     val navyBlue = Color(0xFF1C375B)
+    val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -290,19 +293,38 @@ fun ApplicationTpoCard(app: com.shettyharshith33.placementpro.models.Application
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(app.companyName, fontWeight = FontWeight.Bold, color = navyBlue)
-                Text(app.status, fontWeight = FontWeight.SemiBold, color = Color(0xFF2E7D32), fontSize = 12.sp)
+                Text(app.companyName, fontWeight = FontWeight.ExtraBold, color = navyBlue, fontSize = 16.sp)
+                Surface(color = Color(0xFF2E7D32).copy(alpha = 0.1f), shape = RoundedCornerShape(8.dp)) {
+                    Text(app.status, color = Color(0xFF2E7D32), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                }
             }
-            Text("Candidate ID: ${app.studentId}", fontSize = 12.sp, color = Color.Gray)
-            Text("Role Offered: ${app.roleOffered}", fontSize = 14.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Candidate: ${app.studentName}", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            Text("CGPA: ${app.studentCgpa}", color = navyBlue, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Text("Role Offered: ${app.roleOffered}", fontSize = 13.sp)
+            Text("Applied On: ${app.appliedAt?.toDate()?.toLocaleString() ?: "N/A"}", fontSize = 11.sp, color = Color.Gray)
             
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedButton(
-                onClick = { /* View student details */ },
+                onClick = { 
+                    if (app.studentResumeUrl.isNotBlank()) {
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(app.studentResumeUrl))
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Cannot open resume", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(context, "No resume uploaded by student", Toast.LENGTH_SHORT).show()
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(0.dp)
+                contentPadding = PaddingValues(0.dp),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Text("View Student Profile / Resume", fontSize = 12.sp)
+                Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("View Student Resume", fontSize = 12.sp)
             }
         }
     }

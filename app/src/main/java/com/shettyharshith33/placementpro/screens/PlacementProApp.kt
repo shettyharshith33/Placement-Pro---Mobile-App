@@ -17,28 +17,19 @@ fun PlacementProApp() {
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
 
-    // 🔥 AUTO-LOGIN LOGIC
-    LaunchedEffect(Unit) {
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            db.collection(FirestoreCollections.USERS).document(currentUser.uid).get()
-                .addOnSuccessListener { doc ->
-                    val role = doc.getString("role") ?: ""
-                    val isComplete = doc.getBoolean("profileCompleted") ?: false
-                    
-                    if (role == UserRole.STUDENT && !isComplete) {
-                        navController.navigate(Screen.ResumeWizard.route) { popUpTo(0) }
-                    } else if (role.isNotBlank()) {
-                        navController.navigate(Screen.Dashboard.createRoute(role)) { popUpTo(0) }
-                    }
-                }
-        }
-    }
-
     NavHost(
         navController = navController,
-        startDestination = Screen.RoleSelection.route
+        startDestination = Screen.Splash.route
     ) {
+
+        // ================= SPLASH =================
+        composable(Screen.Splash.route) {
+            SplashScreen { destination ->
+                navController.navigate(destination) {
+                    popUpTo(Screen.Splash.route) { inclusive = true }
+                }
+            }
+        }
 
         // ================= ROLE SELECTION =================
         composable(Screen.RoleSelection.route) {

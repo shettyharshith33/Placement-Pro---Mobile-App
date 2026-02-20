@@ -1,6 +1,8 @@
 package com.shettyharshith33.placementpro.models
 
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.IgnoreExtraProperties
+import com.google.firebase.firestore.PropertyName
 
 // 1. Roles & Collections Constants
 object UserRole {
@@ -52,15 +54,19 @@ data class Certification(val title: String = "", val issuer: String = "", val ye
 data class Internship(val company: String = "", val role: String = "", val duration: String = "")
 
 
+@IgnoreExtraProperties
 data class CompanyDrive(
     val companyId: String = "",
     val companyName: String = "",
     val roleOffered: String = "",
     val location: String = "",
     val description: String = "",
-    // Use packageLPA to avoid reserved keyword 'package'
-    val packageLPA: Double = 0.0,
-    val isActive: Boolean = true,
+    @get:PropertyName("package")
+    @set:PropertyName("package")
+    var packageLPA: Double = 0.0,
+    @get:PropertyName("isActive")
+    @set:PropertyName("isActive")
+    var isActive: Boolean = true,
     val minCGPA: Double = 0.0,
     val maxBacklogs: Int = 0,
     val batchYear: Int = 2026,
@@ -99,6 +105,9 @@ data class Application(
     val applicationId: String = "",
     val driveId: String = "",
     val studentId: String = "",
+    val studentName: String = "",
+    val studentResumeUrl: String = "",
+    val studentCgpa: Double = 0.0,
     val companyName: String = "",
     val roleOffered: String = "",
     val status: String = ApplicationStatus.APPLIED,
@@ -120,6 +129,8 @@ data class MentorSlot(
 
 // Navigation routes
 sealed class Screen(val route: String) {
+
+    object Splash : Screen("splash")
 
     object RoleSelection : Screen("role_selection")
 
