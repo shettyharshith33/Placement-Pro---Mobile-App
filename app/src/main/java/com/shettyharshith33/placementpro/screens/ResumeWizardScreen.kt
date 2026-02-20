@@ -9,6 +9,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -24,221 +28,153 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.shettyharshith33.placementpro.models.FirestoreCollections
 
-private val PrimaryBlue = Color(0xFF4DA3FF)
+private val PrimaryBlue = Color(0xFF1C375B) // Professional Navy from your screenshots
 
-// 🔥 VERY IMPORTANT — safe filename generator
 private fun safeFileName(name: String): String {
-    return name
-        .trim()
-        .lowercase()
+    return name.trim().lowercase()
         .replace("[^a-z0-9]".toRegex(), "_")
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ResumeWizardScreen(onComplete: () -> Unit) {
-
     val db = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
     val storage = FirebaseStorage.getInstance()
     val context = LocalContext.current
 
-    // 🔵 UI state
+    // UI STATE
     var name by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var branch by remember { mutableStateOf("") }
     var cgpa by remember { mutableStateOf("") }
     var backlogs by remember { mutableStateOf("") }
-    var skills by remember { mutableStateOf("") }
     var rollNumber by remember { mutableStateOf("") }
+    var skillInput by remember { mutableStateOf("") }
+    var skillsList by remember { mutableStateOf(listOf<String>()) }
     var resumeUri by remember { mutableStateOf<Uri?>(null) }
     var isLoading by remember { mutableStateOf(false) }
 
-    // 📄 File picker
+    val tfColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = Color.Black,
+        unfocusedTextColor = Color.Black,
+        cursorColor = PrimaryBlue,
+        focusedBorderColor = PrimaryBlue,
+        unfocusedBorderColor = Color.Gray,
+        focusedLabelColor = PrimaryBlue
+    )
+
     val resumePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        resumeUri = uri
-    }
+    ) { uri -> resumeUri = uri }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-
+    Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
-                .verticalScroll(rememberScrollState()),
+            modifier = Modifier.fillMaxSize().padding(24.dp).verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            Text(
-                "Complete Your Profile",
-                style = MaterialTheme.typography.headlineMedium,
-                color = PrimaryBlue,
-                fontWeight = FontWeight.Bold
-            )
-
+            Text("Complete Your Profile", style = MaterialTheme.typography.headlineMedium, color = PrimaryBlue, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(32.dp))
 
-            OutlinedTextField(name, { name = it }, label = { Text("Full Name") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Full Name") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = phone,
-                onValueChange = { if (it.length <= 10) phone = it.filter { ch -> ch.isDigit() } },
-                label = { Text("Mobile Number (10 digits)") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
+            OutlinedTextField(value = phone, onValueChange = { if (it.length <= 10) phone = it.filter { ch -> ch.isDigit() } }, label = { Text("Mobile Number") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(rollNumber, { rollNumber = it }, label = { Text("Roll Number") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = rollNumber, onValueChange = { rollNumber = it }, label = { Text("Roll Number") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(branch, { branch = it }, label = { Text("Branch (e.g., CSE)") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = branch, onValueChange = { branch = it }, label = { Text("Branch (e.g., CSE)") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(cgpa, { cgpa = it }, label = { Text("Current CGPA") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = cgpa, onValueChange = { cgpa = it }, label = { Text("CGPA") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(backlogs, { backlogs = it }, label = { Text("Active Backlogs") }, modifier = Modifier.fillMaxWidth())
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ✅ SKILLS → ARRAY
-            OutlinedTextField(
-                value = skills,
-                onValueChange = { skills = it },
-                label = { Text("Skills (comma separated)") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            OutlinedTextField(value = backlogs, onValueChange = { backlogs = it }, label = { Text("Backlogs") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
 
             Spacer(modifier = Modifier.height(24.dp))
+            Text("Skills", fontWeight = FontWeight.SemiBold, color = PrimaryBlue, modifier = Modifier.fillMaxWidth())
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(value = skillInput, onValueChange = { skillInput = it }, label = { Text("Add skill") }, colors = tfColors, modifier = Modifier.weight(1f), singleLine = true)
+                IconButton(onClick = {
+                    val skill = skillInput.trim()
+                    if (skill.isNotEmpty() && !skillsList.contains(skill)) {
+                        skillsList = skillsList + skill
+                        skillInput = ""
+                    }
+                }) { Icon(Icons.Default.Add, contentDescription = "Add", tint = PrimaryBlue) }
+            }
+            FlowRow(modifier = Modifier.padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                skillsList.forEach { skill ->
+                    AssistChip(onClick = {}, label = { Text(skill) }, trailingIcon = {
+                        IconButton(onClick = { skillsList = skillsList - skill }) { Icon(Icons.Default.Close, modifier = Modifier.size(16.dp), contentDescription = null) }
+                    })
+                }
+            }
 
-            // 📄 Upload Resume Button
-            Button(
-                onClick = { resumePicker.launch("application/pdf") },
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    if (resumeUri == null) "Upload Resume (PDF)"
-                    else "Resume Selected ✓",
-                    color = Color.White
-                )
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(onClick = { resumePicker.launch("application/pdf") }, colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue), modifier = Modifier.fillMaxWidth()) {
+                Text(if (resumeUri == null) "Upload Resume (PDF)" else "Resume Selected ✓", color = Color.White)
             }
 
             Spacer(modifier = Modifier.height(40.dp))
-
             Button(
                 onClick = {
-
                     val uid = auth.currentUser?.uid ?: return@Button
-
                     if (name.isBlank() || phone.length != 10 || branch.isBlank()) {
-                        Toast.makeText(context, "Enter valid details", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Fill all required fields", Toast.LENGTH_SHORT).show()
                         return@Button
                     }
-
                     isLoading = true
 
-                    FirebaseMessaging.getInstance().token
-                        .addOnSuccessListener { token ->
+                    FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                        fun saveData(resumeUrl: String, fileName: String) {
+                            val userUpdates = hashMapOf(
+                                "uid" to uid,
+                                "name" to name.trim(),
+                                "phone" to phone,
+                                "rollNumber" to rollNumber.trim().uppercase(),
+                                "branch" to branch.uppercase().trim(),
+                                "cgpa" to (cgpa.toDoubleOrNull() ?: 0.0),
+                                "backlogs" to (backlogs.toIntOrNull() ?: 0),
+                                "skills" to skillsList,
+                                "resumeUrl" to resumeUrl,
+                                "resumeFileName" to fileName,
+                                "profileCompleted" to true,
+                                "fcmToken" to token,
+                                "updatedAt" to Timestamp.now()
+                            )
 
-                            fun saveData(resumeUrl: String, fileName: String) {
-
-                                val skillsList = skills
-                                    .split(",")
-                                    .map { it.trim() }
-                                    .filter { it.isNotEmpty() }
-
-                                val studentUpdates = hashMapOf(
-                                    "branch" to branch.uppercase().trim(),
-                                    "cgpa" to (cgpa.toDoubleOrNull() ?: 0.0),
-                                    "backlogs" to (backlogs.toIntOrNull() ?: 0),
-                                    "skills" to skillsList,
-                                    "placed" to false,
-                                    "resumeUrl" to resumeUrl,
-                                    "resumeFileName" to fileName,
-                                    "updatedAt" to Timestamp.now()
-                                )
-
-                                val userUpdates = hashMapOf(
-                                    "name" to name.trim(),
-                                    "phone" to phone,
-                                    "rollNumber" to rollNumber,
-                                    "profileCompleted" to true,
-                                    "fcmToken" to token,
-                                    "updatedAt" to Timestamp.now()
-                                )
-
-                                db.collection(FirestoreCollections.STUDENTS)
-                                    .document(uid)
-                                    .set(studentUpdates, SetOptions.merge())
-
-                                db.collection(FirestoreCollections.USERS)
-                                    .document(uid)
-                                    .set(userUpdates, SetOptions.merge())
-                                    .addOnSuccessListener {
-                                        isLoading = false
-                                        Toast.makeText(context, "Profile Updated!", Toast.LENGTH_SHORT).show()
-                                        onComplete()
-                                    }
-                                    .addOnFailureListener {
-                                        isLoading = false
-                                        Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
-                                    }
-                            }
-
-                            // 🔥 Upload resume if selected
-                            if (resumeUri != null) {
-
-                                val safeName = safeFileName(name)
-                                val fileName = "${safeName}.pdf"
-
-                                val ref = storage.reference
-                                    .child("resumes/$uid/$fileName")
-
-                                ref.putFile(resumeUri!!)
-                                    .continueWithTask { ref.downloadUrl }
-                                    .addOnSuccessListener { uri ->
-                                        saveData(uri.toString(), fileName)
-                                    }
-                                    .addOnFailureListener {
-                                        isLoading = false
-                                        Toast.makeText(context, "Resume upload failed", Toast.LENGTH_SHORT).show()
-                                    }
-
-                            } else {
-                                saveData("", "")
-                            }
+                            // FORCE PATH: Direct string "users" to match your Firestore exactly
+                            db.collection("users").document(uid)
+                                .set(userUpdates, SetOptions.merge())
+                                .addOnSuccessListener {
+                                    isLoading = false
+                                    onComplete()
+                                }
+                                .addOnFailureListener {
+                                    isLoading = false
+                                    Toast.makeText(context, "Firestore Error: ${it.message}", Toast.LENGTH_LONG).show()
+                                }
                         }
+
+                        if (resumeUri != null) {
+                            val fileName = "${safeFileName(name)}_resume.pdf"
+                            val ref = storage.reference.child("resumes/$uid/$fileName")
+                            ref.putFile(resumeUri!!)
+                                .continueWithTask { ref.downloadUrl }
+                                .addOnSuccessListener { uri -> saveData(uri.toString(), fileName) }
+                                .addOnFailureListener {
+                                    isLoading = false
+                                    Toast.makeText(context, "Resume Upload Error", Toast.LENGTH_SHORT).show()
+                                }
+                        } else {
+                            saveData("", "")
+                        }
+                    }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+                modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
                 enabled = !isLoading
             ) {
-                if (isLoading) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                } else {
-                    Text("SAVE & CONTINUE", fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-
-        // 🔥 Full screen loader
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.25f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = PrimaryBlue)
+                if (isLoading) CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                else Text("SAVE & CONTINUE", fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -259,10 +195,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -276,11 +211,9 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
-import com.shettyharshith33.placementpro.models.FirestoreCollections
 
-private val PrimaryBlue = Color(0xFF4DA3FF)
+private val PrimaryBlue = Color(0xFF1C375B)
 
-/* 🔥 safe filename */
 private fun safeFileName(name: String): String {
     return name.trim().lowercase()
         .replace("[^a-z0-9]".toRegex(), "_")
@@ -295,22 +228,19 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
     val storage = FirebaseStorage.getInstance()
     val context = LocalContext.current
 
-    // ---------------- UI STATE ----------------
+    // ---------------- STATE ----------------
     var name by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var branch by remember { mutableStateOf("") }
     var cgpa by remember { mutableStateOf("") }
     var backlogs by remember { mutableStateOf("") }
     var rollNumber by remember { mutableStateOf("") }
-
-    // ⭐ NEW SKILLS SYSTEM
     var skillInput by remember { mutableStateOf("") }
     var skillsList by remember { mutableStateOf(listOf<String>()) }
-
     var resumeUri by remember { mutableStateOf<Uri?>(null) }
     var isLoading by remember { mutableStateOf(false) }
 
-    // ---------- TextField colors (FIX WHITE TEXT BUG)
+    // ---------------- TextField colors (fix white text bug)
     val tfColors = OutlinedTextFieldDefaults.colors(
         focusedTextColor = Color.Black,
         unfocusedTextColor = Color.Black,
@@ -320,11 +250,79 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
         focusedLabelColor = PrimaryBlue
     )
 
-    // ---------- File picker
     val resumePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri -> resumeUri = uri }
 
+    // =========================================================
+    // 🔥 MAIN SAVE FUNCTION (BULLETPROOF)
+    // =========================================================
+    fun uploadAndSave(uid: String, token: String) {
+
+        fun saveToFirestore(resumeUrlFinal: String, fileName: String) {
+
+            val userUpdates = hashMapOf(
+                "uid" to uid,
+                "name" to name.trim(),
+                "phone" to phone,
+                "rollNumber" to rollNumber.trim().uppercase(),
+                "branch" to branch.uppercase().trim(),
+                "cgpa" to (cgpa.toDoubleOrNull() ?: 0.0),
+                "backlogs" to (backlogs.toIntOrNull() ?: 0),
+                "skills" to skillsList,
+                "resumeUrl" to resumeUrlFinal,
+                "resumeFileName" to fileName,
+                "profileCompleted" to true,
+                "fcmToken" to token,
+                "updatedAt" to Timestamp.now()
+            )
+
+            db.collection("users")
+                .document(uid)
+                .set(userUpdates, SetOptions.merge())
+                .addOnSuccessListener {
+                    isLoading = false
+                    Toast.makeText(context, "Saved to users ✅", Toast.LENGTH_SHORT).show()
+                    onComplete()
+                }
+                .addOnFailureListener { e ->
+                    isLoading = false
+                    Toast.makeText(
+                        context,
+                        "Firestore FAILED: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+        }
+
+        // ---------- resume upload ----------
+        if (resumeUri != null) {
+
+            val fileName = "${safeFileName(name)}_resume.pdf"
+            val ref = storage.reference.child("resumes/$uid/$fileName")
+
+            ref.putFile(resumeUri!!)
+                .continueWithTask { ref.downloadUrl }
+                .addOnSuccessListener { uri ->
+                    saveToFirestore(uri.toString(), fileName)
+                }
+                .addOnFailureListener { e ->
+                    isLoading = false
+                    Toast.makeText(
+                        context,
+                        "Resume upload failed: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+        } else {
+            saveToFirestore("", "")
+        }
+    }
+
+    // =========================================================
+    // UI
+    // =========================================================
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -348,93 +346,42 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Full Name") },
-                colors = tfColors,
-                modifier = Modifier.fillMaxWidth()
-            )
-
+            OutlinedTextField(name, { name = it }, label = { Text("Full Name") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = phone,
-                onValueChange = {
+                phone,
+                {
                     if (it.length <= 10) phone = it.filter { ch -> ch.isDigit() }
                 },
-                label = { Text("Mobile Number (10 digits)") },
+                label = { Text("Mobile Number") },
                 colors = tfColors,
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = rollNumber,
-                onValueChange = { rollNumber = it },
-                label = { Text("Roll Number") },
-                colors = tfColors,
-                modifier = Modifier.fillMaxWidth()
-            )
-
+            OutlinedTextField(rollNumber, { rollNumber = it }, label = { Text("Roll Number") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = branch,
-                onValueChange = { branch = it },
-                label = { Text("Branch (e.g., CSE)") },
-                colors = tfColors,
-                modifier = Modifier.fillMaxWidth()
-            )
-
+            OutlinedTextField(branch, { branch = it }, label = { Text("Branch (e.g., CSE)") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = cgpa,
-                onValueChange = { cgpa = it },
-                label = { Text("Current CGPA") },
-                colors = tfColors,
-                modifier = Modifier.fillMaxWidth()
-            )
-
+            OutlinedTextField(cgpa, { cgpa = it }, label = { Text("CGPA") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(backlogs, { backlogs = it }, label = { Text("Backlogs") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
 
-            OutlinedTextField(
-                value = backlogs,
-                onValueChange = { backlogs = it },
-                label = { Text("Active Backlogs") },
-                colors = tfColors,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // =====================================================
-            // 🔥 NEW SKILLS INPUT (CHIP SYSTEM)
-            // =====================================================
-
+            // ---------------- SKILLS ----------------
             Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                "Skills",
-                fontWeight = FontWeight.SemiBold,
-                color = PrimaryBlue,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
+            Text("Skills", fontWeight = FontWeight.SemiBold, color = PrimaryBlue, modifier = Modifier.fillMaxWidth())
 
             Row(verticalAlignment = Alignment.CenterVertically) {
 
                 OutlinedTextField(
-                    value = skillInput,
-                    onValueChange = { skillInput = it },
+                    skillInput,
+                    { skillInput = it },
                     label = { Text("Add skill") },
-                    colors = OutlinedTextFieldDefaults.colors().copy(focusedTextColor = Color.Black) ,
+                    colors = tfColors,
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
-
-                Spacer(modifier = Modifier.width(8.dp))
 
                 IconButton(
                     onClick = {
@@ -445,35 +392,26 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
                         }
                     }
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add")
+                    Icon(Icons.Default.Add, contentDescription = null, tint = PrimaryBlue)
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // 🔥 Skill chips
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 skillsList.forEach { skill ->
                     AssistChip(
                         onClick = {},
                         label = { Text(skill, color = Color.Black) },
                         trailingIcon = {
-                            IconButton(
-                                onClick = {
-                                    skillsList = skillsList - skill
-                                }
-                            ) {
-                                Icon(Icons.Default.Close, contentDescription = null)
+                            IconButton(onClick = { skillsList = skillsList - skill }) {
+                                Icon(Icons.Default.Close, modifier = Modifier.size(16.dp), contentDescription = null)
                             }
                         }
                     )
                 }
             }
-
-            // =====================================================
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -483,21 +421,25 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    if (resumeUri == null) "Upload Resume (PDF)"
-                    else "Resume Selected ✓",
+                    if (resumeUri == null) "Upload Resume (PDF)" else "Resume Selected ✓",
                     color = Color.White
                 )
             }
 
             Spacer(modifier = Modifier.height(40.dp))
 
+            // ================= SAVE BUTTON =================
             Button(
                 onClick = {
 
-                    val uid = auth.currentUser?.uid ?: return@Button
+                    val uid = auth.currentUser?.uid
+                    if (uid == null) {
+                        Toast.makeText(context, "User not logged in", Toast.LENGTH_LONG).show()
+                        return@Button
+                    }
 
                     if (name.isBlank() || phone.length != 10 || branch.isBlank()) {
-                        Toast.makeText(context, "Enter valid details", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Fill all required fields", Toast.LENGTH_SHORT).show()
                         return@Button
                     }
 
@@ -505,61 +447,10 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
 
                     FirebaseMessaging.getInstance().token
                         .addOnSuccessListener { token ->
-
-                            fun saveData(resumeUrl: String, fileName: String) {
-
-                                // 🔥 PRIMARY — USERS (your requirement)
-                                val userUpdates = hashMapOf(
-                                    "name" to name.trim(),
-                                    "phone" to phone,
-                                    "rollNumber" to rollNumber,
-                                    "branch" to branch.uppercase().trim(),
-                                    "cgpa" to (cgpa.toDoubleOrNull() ?: 0.0),
-                                    "backlogs" to (backlogs.toIntOrNull() ?: 0),
-                                    "skills" to skillsList,
-                                    "resumeUrl" to resumeUrl,
-                                    "resumeFileName" to fileName,
-                                    "profileCompleted" to true,
-                                    "fcmToken" to token,
-                                    "updatedAt" to Timestamp.now()
-                                )
-
-                                db.collection(FirestoreCollections.USERS)
-                                    .document(uid)
-                                    .set(userUpdates, SetOptions.merge())
-                                    .addOnSuccessListener {
-                                        isLoading = false
-                                        Toast.makeText(context, "Profile Updated!", Toast.LENGTH_SHORT).show()
-                                        onComplete()
-                                    }
-                                    .addOnFailureListener {
-                                        isLoading = false
-                                        Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
-                                    }
-                            }
-
-                            // 🔥 resume upload
-                            if (resumeUri != null) {
-
-                                val safeName = safeFileName(name)
-                                val fileName = "$safeName.pdf"
-
-                                val ref = storage.reference
-                                    .child("resumes/$uid/$fileName")
-
-                                ref.putFile(resumeUri!!)
-                                    .continueWithTask { ref.downloadUrl }
-                                    .addOnSuccessListener { uri ->
-                                        saveData(uri.toString(), fileName)
-                                    }
-                                    .addOnFailureListener {
-                                        isLoading = false
-                                        Toast.makeText(context, "Resume upload failed", Toast.LENGTH_SHORT).show()
-                                    }
-
-                            } else {
-                                saveData("", "")
-                            }
+                            uploadAndSave(uid, token)
+                        }
+                        .addOnFailureListener {
+                            uploadAndSave(uid, "")
                         }
                 },
                 modifier = Modifier
@@ -573,18 +464,6 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
                 } else {
                     Text("SAVE & CONTINUE", fontWeight = FontWeight.Bold)
                 }
-            }
-        }
-
-        // 🔥 loader overlay
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.25f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = PrimaryBlue)
             }
         }
     }

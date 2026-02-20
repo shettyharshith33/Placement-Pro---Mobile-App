@@ -59,18 +59,24 @@ data class Project(
 data class Certification(val title: String = "", val issuer: String = "", val year: Int = 0)
 data class Internship(val company: String = "", val role: String = "", val duration: String = "")
 
-// 4. Company/Job Drive Model
+
 data class CompanyDrive(
     val companyId: String = "",
     val companyName: String = "",
     val roleOffered: String = "",
-    val packageLPA: Double = 0.0,
+    val location: String = "",
+    val description: String = "",
+    // Use backticks to match the Firestore field name exactly
+    val `package`: Double = 0.0,
+    val isActive: Boolean = true,
     val minCGPA: Double = 0.0,
     val maxBacklogs: Int = 0,
-    val allowedBranches: List<String> = emptyList(),
+    val batchYear: Int = 2026,
     val deadline: Timestamp? = null,
-    val isActive: Boolean = true,
-    val location: String = ""
+    val createdAt: Timestamp? = null,
+    val createdBy: String = "",
+    val rounds: List<String> = emptyList(),
+    val allowedBranches: List<String> = emptyList()
 )
 
 
