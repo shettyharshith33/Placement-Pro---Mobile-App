@@ -1,10 +1,26 @@
 package com.shettyharshith33.placementpro.screens
 
 
-import android.widget.Toast
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,8 +31,10 @@ import androidx.compose.ui.unit.dp
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.shettyharshith33.placementpro.classes.FirestoreCollections
-import com.shettyharshith33.placementpro.classes.User
+import com.shettyharshith33.placementpro.models.FirestoreCollections
+import com.shettyharshith33.placementpro.models.StudentProfile
+import com.shettyharshith33.placementpro.models.User
+import com.shettyharshith33.placementpro.models.UserRole
 
 @Composable
 fun RegisterScreen(
@@ -89,39 +107,38 @@ fun RegisterScreen(
 
         Button(
             onClick = {
-                if (name.isBlank() || email.isBlank() || password.length < 6) {
-                    Toast.makeText(context, "Enter valid details (min 6 chars)", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
-
-                isLoading = true
+// Inside RegisterScreen Button onClick:
                 auth.createUserWithEmailAndPassword(email.trim(), password)
                     .addOnSuccessListener { result ->
                         val uid = result.user!!.uid
-                        val user = User(
+
+                        // 1. Create the Base User (for Auth & Web sync)
+                        val userBase = User(
                             uid = uid,
                             name = name.trim(),
                             email = email.trim(),
-                            role = role,
-                            createdAt = Timestamp.now()
+                            role = UserRole.STUDENT, // or role passed from previous screen
+                            createdAt = Timestamp.now(),
+                            profileCompleted = false
                         )
 
-                        db.collection(FirestoreCollections.USERS)
-                            .document(uid)
-                            .set(user)
-                            .addOnSuccessListener {
-                                result.user!!.sendEmailVerification()
-                                isLoading = false
-                                onRegisterSuccess()
-                            }
-                            .addOnFailureListener { e ->
-                                isLoading = false
-                                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
-                            }
-                    }
-                    .addOnFailureListener { e ->
-                        isLoading = false
-                        Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                        // 2. Create the Empty Student Profile (To be filled in Resume Wizard)
+                        val studentProfile = StudentProfile(
+                            uid = uid,
+                            batchYear = 2026 // Default from your schema
+                        )
+
+                        val batch = db.batch()
+                        val userRef = db.collection(FirestoreCollections.USERS).document(uid)
+                        val studentRef = db.collection(FirestoreCollections.STUDENTS).document(uid)
+
+                        batch.set(userRef, userBase)
+                        batch.set(studentRef, studentProfile)
+
+                        batch.commit().addOnSuccessListener {
+                            result.user!!.sendEmailVerification()
+                            onRegisterSuccess()
+                        }
                     }
             },
             modifier = Modifier.fillMaxWidth().height(56.dp),

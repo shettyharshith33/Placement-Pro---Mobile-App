@@ -6,12 +6,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.shettyharshith33.placementpro.classes.UserRole
+import com.shettyharshith33.placementpro.models.UserRole
 
 @Composable
 fun LoginScreen(
@@ -38,19 +39,21 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
+            colors = OutlinedTextFieldDefaults.colors().copy(focusedTextColor = Color.Black),
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
+            label = { Text("Email", color = Color.Black) },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedTextField(
+            colors = OutlinedTextFieldDefaults.colors().copy(focusedTextColor = Color.Black),
             value = password,
             onValueChange = { password = it },
             visualTransformation = PasswordVisualTransformation(),
-            label = { Text("Password") },
+            label = { Text("Password", color = Color.Black) },
             modifier = Modifier.fillMaxWidth()
         )
 

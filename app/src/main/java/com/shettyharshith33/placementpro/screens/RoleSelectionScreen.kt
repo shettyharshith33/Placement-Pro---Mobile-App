@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.shettyharshith33.placementpro.classes.UserRole
+import com.shettyharshith33.placementpro.models.UserRole
 
 @Composable
 fun RoleSelectionScreen(
