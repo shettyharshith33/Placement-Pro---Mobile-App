@@ -144,14 +144,11 @@ fun PlacementProApp() {
                         popUpTo(0)
                     }
                 },
-                onNavigateToCreateDrive = {
-                    navController.navigate(Screen.CreateDrive.route)
+                onNavigateToCreateDrive = { driveId ->
+                    navController.navigate(Screen.CreateDrive.createRoute(driveId))
                 },
                 onNavigateToBot = {
                     navController.navigate(Screen.PlacementBot.route)
-                },
-                onNavigateToScheduler = {
-                    navController.navigate(Screen.InterviewScheduler.route)
                 },
                 onNavigateToMarket = {
                     navController.navigate(Screen.MarketIntelligence.route)
@@ -160,9 +157,11 @@ fun PlacementProApp() {
         }
 
         // ================= CREATE DRIVE (TPO) =================
-        composable(Screen.CreateDrive.route) {
+        composable(Screen.CreateDrive.route) { backStackEntry ->
+            val driveId = backStackEntry.arguments?.getString("driveId")
             CreateDriveScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                driveId = driveId
             )
         }
 
@@ -180,11 +179,5 @@ fun PlacementProApp() {
             )
         }
 
-        // ================= INTERVIEW SCHEDULER =================
-        composable(Screen.InterviewScheduler.route) {
-            InterviewSchedulerScreen(
-                onBack = { navController.popBackStack() }
-            )
-        }
     }
 }

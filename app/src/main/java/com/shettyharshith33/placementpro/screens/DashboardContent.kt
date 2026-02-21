@@ -17,10 +17,10 @@ import com.shettyharshith33.placementpro.models.UserRole
 fun DashboardContent(
     role: String,
     onLogout: () -> Unit,
-    onNavigateToCreateDrive: () -> Unit = {},
+    onNavigateToCreateDrive: (String?) -> Unit = {},
     onNavigateToBot: () -> Unit = {},
-    onNavigateToScheduler: () -> Unit = {},
-    onNavigateToMarket: () -> Unit = {}
+    onNavigateToMarket: () -> Unit = {},
+    onNavigateToScheduler: () -> Unit = {}
 ) {
     val navyBlue = Color(0xFF1C375B)
 

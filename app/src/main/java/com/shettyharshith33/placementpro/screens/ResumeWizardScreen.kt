@@ -57,6 +57,8 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
     var projectDesc by remember { mutableStateOf("") }
 
     var resumeUri by remember { mutableStateOf<Uri?>(null) }
+    var existingResumeUrl by remember { mutableStateOf("") }
+    var existingResumeFileName by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
     // 🔥 FETCH EXISTING DATA IF ANY
@@ -74,6 +76,8 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
                     rollNumber = it.rollNumber
                     skillsList = it.skills
                     projectsList = it.projects
+                    existingResumeUrl = it.resumeUrl
+                    existingResumeFileName = it.resumeFileName
                 }
             }
         }
@@ -121,7 +125,8 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
                 }
                 .addOnFailureListener { e ->
                     isLoading = false
-                    Toast.makeText(context, "Firestore Error: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Firestore Error: ${e.message}", Toast.LENGTH_LONG)
+                        .show()
                 }
         }
 
@@ -136,13 +141,21 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
                     Toast.makeText(context, "Upload Failed: ${e.message}", Toast.LENGTH_LONG).show()
                 }
         } else {
-            saveToFirestore("", "")
+            // Preserve the existing resume data if no new file is selected
+            saveToFirestore(existingResumeUrl, existingResumeFileName)
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(24.dp).verticalScroll(rememberScrollState()),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -160,10 +173,19 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = androidx.compose.foundation.BorderStroke(0.5.dp, Color.LightGray.copy(alpha = 0.5f))
+                border = androidx.compose.foundation.BorderStroke(
+                    0.5.dp,
+                    Color.LightGray.copy(alpha = 0.5f)
+                )
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    OutlinedTextField(name, { name = it }, label = { Text("Full Name") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(
+                        name,
+                        { name = it },
+                        label = { Text("Full Name") },
+                        colors = tfColors,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedTextField(
                         phone,
@@ -182,17 +204,44 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = androidx.compose.foundation.BorderStroke(0.5.dp, Color.LightGray.copy(alpha = 0.5f))
+                border = androidx.compose.foundation.BorderStroke(
+                    0.5.dp,
+                    Color.LightGray.copy(alpha = 0.5f)
+                )
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    OutlinedTextField(rollNumber, { rollNumber = it }, label = { Text("Roll Number") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(
+                        rollNumber,
+                        { rollNumber = it },
+                        label = { Text("Roll Number") },
+                        colors = tfColors,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedTextField(branch, { branch = it }, label = { Text("Branch (e.g., CSE)") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(
+                        branch,
+                        { branch = it },
+                        label = { Text("Branch (e.g., CSE)") },
+                        colors = tfColors,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedTextField(cgpa, { cgpa = it }, label = { Text("CGPA") }, colors = tfColors, modifier = Modifier.weight(1f))
+                        OutlinedTextField(
+                            cgpa,
+                            { cgpa = it },
+                            label = { Text("CGPA") },
+                            colors = tfColors,
+                            modifier = Modifier.weight(1f)
+                        )
                         Spacer(modifier = Modifier.width(12.dp))
-                        OutlinedTextField(backlogs, { backlogs = it }, label = { Text("Backlogs") }, colors = tfColors, modifier = Modifier.weight(1f))
+                        OutlinedTextField(
+                            backlogs,
+                            { backlogs = it },
+                            label = { Text("Backlogs") },
+                            colors = tfColors,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
             }
@@ -204,7 +253,10 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = androidx.compose.foundation.BorderStroke(0.5.dp, Color.LightGray.copy(alpha = 0.5f))
+                border = androidx.compose.foundation.BorderStroke(
+                    0.5.dp,
+                    Color.LightGray.copy(alpha = 0.5f)
+                )
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -226,13 +278,22 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
                             Icon(Icons.Default.Add, contentDescription = null, tint = navyBlue)
                         }
                     }
-                    FlowRow(modifier = Modifier.padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FlowRow(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         skillsList.forEach { skill ->
                             InputChip(
                                 selected = true,
                                 onClick = { skillsList = skillsList - skill },
                                 label = { Text(skill) },
-                                trailingIcon = { Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                                trailingIcon = {
+                                    Icon(
+                                        Icons.Default.Close,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
                             )
                         }
                     }
@@ -246,17 +307,36 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = androidx.compose.foundation.BorderStroke(0.5.dp, Color.LightGray.copy(alpha = 0.5f))
+                border = androidx.compose.foundation.BorderStroke(
+                    0.5.dp,
+                    Color.LightGray.copy(alpha = 0.5f)
+                )
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    OutlinedTextField(projectTitle, { projectTitle = it }, label = { Text("Project Title") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(
+                        projectTitle,
+                        { projectTitle = it },
+                        label = { Text("Project Title") },
+                        colors = tfColors,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(projectDesc, { projectDesc = it }, label = { Text("Short Description") }, colors = tfColors, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(
+                        projectDesc,
+                        { projectDesc = it },
+                        label = { Text("Short Description") },
+                        colors = tfColors,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = {
                             if (projectTitle.isNotBlank()) {
-                                projectsList = projectsList + com.shettyharshith33.placementpro.models.Project(projectTitle, projectDesc)
+                                projectsList =
+                                    projectsList + com.shettyharshith33.placementpro.models.Project(
+                                        projectTitle,
+                                        projectDesc
+                                    )
                                 projectTitle = ""
                                 projectDesc = ""
                             }
@@ -274,7 +354,11 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
                             supportingContent = { Text(proj.description) },
                             trailingContent = {
                                 IconButton(onClick = { projectsList = projectsList - proj }) {
-                                    Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red)
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = null,
+                                        tint = Color.Red
+                                    )
                                 }
                             }
                         )
@@ -288,13 +372,25 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
             WizardSectionHeader("Professional Assets", Icons.Default.AccountBox)
             Button(
                 onClick = { resumePicker.launch("application/pdf") },
-                colors = ButtonDefaults.buttonColors(containerColor = if(resumeUri != null) Color(0xFF2E7D32) else navyBlue),
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (resumeUri != null || existingResumeUrl.isNotBlank()) Color(
+                        0xFF2E7D32
+                    ) else navyBlue
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(if(resumeUri != null) Icons.Default.CheckCircle else Icons.Default.Build, contentDescription = null)
+                Icon(
+                    if (resumeUri != null || existingResumeUrl.isNotBlank()) Icons.Default.CheckCircle else Icons.Default.Build,
+                    contentDescription = null
+                )
                 Spacer(modifier = Modifier.width(12.dp))
-                Text(if (resumeUri == null) "Choose Resume PDF" else "Resume Attached ✓")
+                Text(
+                    if (resumeUri == null && existingResumeUrl.isBlank()) "Choose Resume PDF" else if (resumeUri != null) "New Resume Attached ✓" else "Existing Resume Present ✓",
+                    color = Color.White
+                )
             }
 
             Spacer(modifier = Modifier.height(48.dp))
@@ -303,21 +399,38 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
                 onClick = {
                     val uid = auth.currentUser?.uid ?: return@Button
                     if (name.isBlank() || phone.length < 10 || branch.isBlank()) {
-                        Toast.makeText(context, "Please verify all fields", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Please verify all fields", Toast.LENGTH_SHORT)
+                            .show()
                         return@Button
                     }
                     isLoading = true
-                    FirebaseMessaging.getInstance().token.addOnSuccessListener { token -> uploadAndSave(uid, token) }.addOnFailureListener { uploadAndSave(uid, "") }
+                    FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                        uploadAndSave(
+                            uid,
+                            token
+                        )
+                    }.addOnFailureListener { uploadAndSave(uid, "") }
                 },
-                modifier = Modifier.fillMaxWidth().height(60.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = navyBlue),
                 shape = RoundedCornerShape(16.dp),
                 enabled = !isLoading
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp
+                    )
                 } else {
-                    Text("FINISH SETUP", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text(
+                        "FINISH SETUP",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = Color.White
+                    )
                 }
             }
         }
@@ -328,9 +441,16 @@ fun ResumeWizardScreen(onComplete: () -> Unit) {
 fun WizardSectionHeader(title: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp)
     ) {
-        Icon(icon, contentDescription = null, tint = Color(0xFF1C375B), modifier = Modifier.size(20.dp))
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = Color(0xFF1C375B),
+            modifier = Modifier.size(20.dp)
+        )
         Spacer(modifier = Modifier.width(8.dp))
         Text(title, fontWeight = FontWeight.Bold, color = Color(0xFF1C375B), fontSize = 16.sp)
     }

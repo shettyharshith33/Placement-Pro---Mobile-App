@@ -59,6 +59,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.room.ktx)
 
     val nav_version = "2.9.7" // Or "3.0.0" for the latest APIs
 
@@ -68,6 +69,8 @@ dependencies {
     implementation ("com.google.firebase:firebase-messaging")
 
     implementation("com.google.firebase:firebase-storage-ktx")
+
+    implementation("com.airbnb.android:lottie-compose:6.4.0")
 
 
 

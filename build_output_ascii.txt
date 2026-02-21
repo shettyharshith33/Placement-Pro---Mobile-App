@@ -1,0 +1,164 @@
+﻿> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:processDebugGoogleServices UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+
+> Task :app:compileDebugKotlin FAILED
+.\gradlew.bat : e: file:///D:
+/PlacementPro/app/src/main/ja
+va/com/shettyharshith33/place
+mentpro/screens/DashboardCont
+ent.kt:79:25 No value passed 
+for parameter 
+'onNavigateToScheduler'.
+At line:1 char:1
++ .\gradlew.bat 
+assembleDebug > 
+build_output.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpeci    fied: (e: 
+file://    /D:/P...teToSched 
+   uler'.:String) []    , 
+RemoteException
+    + FullyQualifiedE    
+rrorId : NativeCo    
+mmandError
+ 
+e: file:///D:/PlacementPro/ap
+p/src/main/java/com/shettyhar
+shith33/placementpro/screens/
+InterviewSchedulerScreen.kt:8
+8:28 Cannot infer type for 
+this parameter. Please 
+specify it explicitly.
+e: file:///D:/PlacementPro/ap
+p/src/main/java/com/shettyhar
+shith33/placementpro/screens/
+InterviewSchedulerScreen.kt:9
+0:102 Unresolved reference 
+'interviewId'.
+e: file:///D:/PlacementPro/ap
+p/src/main/java/com/shettyhar
+shith33/placementpro/screens/
+InterviewSchedulerScreen.kt:9
+4:48 Unresolved reference 
+'copy'.
+e: file:///D:/PlacementPro/ap
+p/src/main/java/com/shettyhar
+shith33/placementpro/screens/
+InterviewSchedulerScreen.kt:1
+05:225 Unresolved reference 
+'toDate'.
+e: file:///D:/PlacementPro/ap
+p/src/main/java/com/shettyhar
+shith33/placementpro/screens/
+InterviewSchedulerScreen.kt:1
+72:1 Conflicting overloads:
+fun 
+ScheduleInterviewDialog(app: 
+Application, onDismiss: () 
+-> Unit, onSchedule: 
+(Interview) -> Unit): Unit
+e: file:///D:/PlacementPro/ap
+p/src/main/java/com/shettyhar
+shith33/placementpro/screens/
+TPODashboardView.kt:147:28 
+Cannot infer type for this 
+parameter. Please specify it 
+explicitly.
+e: file:///D:/PlacementPro/ap
+p/src/main/java/com/shettyhar
+shith33/placementpro/screens/
+TPODashboardView.kt:149:102 
+Unresolved reference 
+'interviewId'.
+e: file:///D:/PlacementPro/ap
+p/src/main/java/com/shettyhar
+shith33/placementpro/screens/
+TPODashboardView.kt:161:63 
+Unresolved reference 'round'.
+e: file:///D:/PlacementPro/ap
+p/src/main/java/com/shettyhar
+shith33/placementpro/screens/
+TPODashboardView.kt:161:163 
+Unresolved reference 
+'slotTimeTimestamp'.
+e: file:///D:/PlacementPro/ap
+p/src/main/java/com/shettyhar
+shith33/placementpro/screens/
+TPODashboardView.kt:161:183 
+Unresolved reference 
+'toDate'.
+e: file:///D:/PlacementPro/ap
+p/src/main/java/com/shettyhar
+shith33/placementpro/screens/
+TPODashboardView.kt:415:1 
+Conflicting overloads:
+fun 
+ScheduleInterviewDialog(app: 
+Application, onDismiss: () 
+-> Unit, onSchedule: 
+(Interview) -> Unit): Unit
+
+FAILURE: Build failed with 
+an exception.
+
+* What went wrong:
+Execution failed for task 
+':app:compileDebugKotlin'.
+> A failure occurred while 
+executing org.jetbrains.kotli
+n.compilerRunner.GradleCompil
+erRunnerWithWorkers$GradleKot
+linCompilerWorkAction
+   > Compilation error. See 
+log for more details
+
+* Try:
+> Run with --stacktrace 
+option to get the stack 
+trace.
+> Run with --info or --debug 
+option to get more log 
+output.
+> Run with --scan to get 
+full insights.
+> Get more help at 
+https://help.gradle.org.
+
+BUILD FAILED in 5s
+31 actionable tasks: 1 executed, 30 up-to-date

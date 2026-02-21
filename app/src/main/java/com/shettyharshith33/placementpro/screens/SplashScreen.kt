@@ -4,10 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -56,14 +53,8 @@ fun SplashScreen(onNavigate: (String) -> Unit) {
             .background(Color.White),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.Star,
-            contentDescription = null,
-            modifier = Modifier.size(100.dp),
-            tint = navyBlue
-        )
         CircularProgressIndicator(
-            modifier = Modifier.align(Alignment.BottomCenter).size(60.dp),
+            modifier = Modifier.size(60.dp),
             color = navyBlue
         )
     }
