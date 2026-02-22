@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Placement Pro"
+rootProject.name = "Place - Mentor"
 include(":app")
