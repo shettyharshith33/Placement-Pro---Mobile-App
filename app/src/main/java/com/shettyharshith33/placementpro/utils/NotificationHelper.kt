@@ -47,6 +47,7 @@ object NotificationHelper {
         // Ensure channel exists
         createNotificationChannel(context)
 
+        // Notification Sound Url
         val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/raw/not_sound")
 
         val notification = NotificationCompat.Builder(context, channelId)
